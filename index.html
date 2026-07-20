@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FREELAN - Lorry Delivery Details</title>
+
+<!-- External Libraries for PDF Generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f7fb;
+    color: #333;
+    line-height: 1.4;
+    padding-bottom: 30px;
+}
+
+/* Header & Navigation */
+.header {
+    background: #c62828; 
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.header-logo img {
+    height: 40px;
+    display: block;
+    object-fit: contain;
+}
+
+.header-titles {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 20px;
+    letter-spacing: 1px;
+    font-weight: 800;
+}
+
+.header h2 {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.top-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Utility Buttons */
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s ease, transform 0.1s ease;
+    min-height: 44px; /* Mobile tap target size optimization */
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-danger { background: #d32f2f; }
+.btn-danger:hover { background: #b71c1c; }
+.btn-green { background: #2e7d32; }
+.btn-green:hover { background: #1b5e20; }
+.btn-red { background: #c62828; width: 100%; }
+.btn-red:hover { background: #b71c1c; }
+
+/* Content Layout Container */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 12px;
+}
+
+/* Form Container */
+.form-box {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fafafa;
+    color: #333;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+input:focus, textarea:focus {
+    border-color: #c62828;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+textarea {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.search-box {
+    position: relative;
+    margin-top: 12px;
+}
+
+.search-box input {
+    padding-left: 36px;
+    background: #fff;
+}
+
+.search-box::before {
+    content: "🔍";
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+/* Table Header Structure (Desktop) */
+.table-head {
+    display: grid;
+    grid-template-columns: 60px 130px 150px 220px 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 0 8px;
+}
+
+.head-cell {
+    color: #5f6368;
+    padding: 8px 4px;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Data Entry Cards / Rows */
+.delivery-row {
+    display: grid;
+    grid-template-columns: 60px 130px 150px 220px 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+    background: white;
+    border-radius: 12px;
+    padding: 12px 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border: 1px solid #e0e0e0;
+}
+
+.cell {
+    padding: 4px;
+}
+
+/* Specific Row Component Styling */
+.number-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.number-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fbe9e7;
+    color: #d84315;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.vehicle-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vehicle-icon { font-size: 20px; }
+.vehicle-number { font-size: 16px; font-weight: 700; color: #111; }
+
+.date-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.date-icon { font-size: 18px; }
+.date-text { font-size: 15px; font-weight: 500; }
+
+.driver-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.driver-name { font-size: 15px; font-weight: 700; color: #111; }
+.driver-phone { font-size: 13px; color: #5f6368; font-weight: 500; }
+
+.area-cell ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.area-cell li {
+    font-size: 13px;
+    background: #f1f3f4;
+    padding: 4px 10px;
+    border-radius: 16px;
+    color: #3c4043;
+    font-weight: 500;
+    border: 1px solid #dadce0;
+}
+
+/* Action Controls Layout */
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.small-btn {
+    padding: 6px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    min-height: 36px;
+}
+
+.small-btn.edit:hover { background: #fff7e6; border-color: #ffb74d; color: #f57c00; }
+.small-btn.delete:hover { background: #ffebee; border-color: #e57373; color: #c62828; }
+
+/* Responsive Media Queries (Mobile Viewport Transformations) */
+@media(max-width: 900px) {
+    .header {
+        padding: 10px 12px;
+    }
+
+    .header-logo img {
+        height: 32px;
+    }
+
+    .header h1 {
+        font-size: 17px;
+    }
+
+    .header h2 {
+        font-size: 9px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 13px;
+        min-height: 38px;
+    }
+
+    .table-head {
+        display: none; /* Hide tabular column naming labels on small viewports */
+    }
+
+    .delivery-row {
+        grid-template-columns: 1fr; /* Convert linear layout to a visual card setup */
+        gap: 12px;
+        padding: 16px;
+        position: relative;
+    }
+
+    .number-cell {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+
+    .vehicle-cell, .date-cell, .driver-cell, .area-cell {
+        border-bottom: 1px solid #f1f3f4;
+        padding-bottom: 10px;
+    }
+
+    .area-cell {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .vehicle-number { font-size: 18px; }
+    .driver-name { font-size: 16px; }
+    .driver-phone { font-size: 14px; }
+    
+    .actions {
+        margin-top: 8px;
+        justify-content: flex-end;
+        width: 100%;
+    }
+    
+    .small-btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 40px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-logo">
+        <img src="https://www.freelansrilanka.com/wp-content/uploads/2022/07/coporateLogo.png" alt="Matara Freelan Logo">
+    </div>
+
+    <div class="header-titles">
+        <h1>FREELAN</h1>
+        <h2>Lorry Delivery Details</h2>
+    </div>
+
+    <div class="top-buttons">
+        <button class="btn btn-green" onclick="makePDF()">📄 PDF</button>
+        <button class="btn btn-danger" onclick="clearAll()">🗑️</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- Entry Submission Form -->
+    <div class="form-box">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="deliveryDate">Delivery Date</label>
+                <input type="date" id="deliveryDate">
+            </div>
+            <div class="form-group">
+                <label for="vehicle">Lorry Number</label>
+                <input type="text" id="vehicle" placeholder="e.g., WP LA-1234">
+            </div> 
+            <div class="form-group">
+                <label for="driver">Driver Name</label>
+                <input type="text" id="driver" placeholder="Enter driver name">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" inputmode="tel" placeholder="Enter phone number">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="areas">Agencies / Destinations</label>
+                <textarea id="areas" placeholder="Enter each destination on a new line"></textarea>
+            </div>
+        </div>
+
+        <button class="btn btn-red" id="saveBtn" onclick="saveRecord()">➕ SAVE RECORD</button>
+
+        <div class="search-box">
+            <input type="text" placeholder="Search vehicle, date, driver, or destination..." onkeyup="searchRecords(this.value)">
+        </div>
+    </div>
+
+    <!-- Layout Labels Table Column Headers (Hidden on Mobile viewports) -->
+    <div class="table-head">
+        <div class="head-cell">#</div>
+        <div class="head-cell">📅 Date</div>
+        <div class="head-cell">🚚 Lorry No.</div>
+        <div class="head-cell">👤 Driver Info</div>
+        <div class="head-cell">🏢 Destinations</div>
+    </div>
+
+    <!-- Active Target Presentation List -->
+    <div id="list"></div>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('freelan_records')) || [];
+let editIndex = -1;
+
+function saveRecord(){
+    const vehicle = document.getElementById('vehicle').value.trim();
+    const deliveryDate = document.getElementById('deliveryDate').value; 
+    const driver = document.getElementById('driver').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const areas = document.getElementById('areas').value.trim();
+
+    if(!vehicle || !driver){
+        alert('Please enter vehicle number and driver name');
+        return;
+    }
+
+    const obj = {vehicle, deliveryDate, driver, phone, areas};
+
+    if(editIndex === -1){
+        data.push(obj);
+    }else{
+        data[editIndex] = obj;
+        editIndex = -1;
+        document.getElementById('saveBtn').innerText = "➕ SAVE RECORD";
+    }
+
+    localStorage.setItem('freelan_records', JSON.stringify(data));
+    clearForm();
+    showData();
+}
+
+function showData(records = data){
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+
+    records.forEach((x, i) => {
+        const row = document.createElement('div');
+        row.className = 'delivery-row';
+
+        const areaList = x.areas
+            .split('\n')
+            .filter(a => a.trim() !== '')
+            .map(a => `<li>${a}</li>`)
+            .join('');
+
+        const displayDate = x.deliveryDate ? x.deliveryDate : 'N/A';
+
+        row.innerHTML = `
+            <div class="cell number-cell">
+                <div class="number-circle">${String(i+1).padStart(2,'0')}</div>
+            </div>
+
+            <div class="cell date-cell">
+                <span class="date-icon">📅</span>
+                <span class="date-text">${displayDate}</span>
+            </div>
+
+            <div class="cell vehicle-cell">
+                <span class="vehicle-icon">🚚</span>
+                <span class="vehicle-number">${x.vehicle}</span>
+            </div>
+
+            <div class="cell driver-cell">
+                <div class="driver-name">${x.driver}</div>
+                <div class="driver-phone">📞 ${x.phone || 'N/A'}</div>
+                <div class="actions">
+                    <button class="small-btn edit" onclick="editRecord(${i})">✏️ Edit</button>
+                    <button class="small-btn delete" onclick="deleteRecord(${i})">🗑️ Delete</button>
+                </div>
+            </div>
+
+            <div class="cell area-cell">
+                <ul>${areaList || '<li>No destinations entered</li>'}</ul>
+            </div>
+        `;
+
+        list.appendChild(row);
+    });
+}
+
+function editRecord(i){
+    const x = data[i];
+    document.getElementById('vehicle').value = x.vehicle;
+    document.getElementById('deliveryDate').value = x.deliveryDate || ''; 
+    document.getElementById('driver').value = x.driver;
+    document.getElementById('phone').value = x.phone;
+    document.getElementById('areas').value = x.areas;
+    editIndex = i;
+    
+    document.getElementById('saveBtn').innerText = "💾 UPDATE RECORD";
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function deleteRecord(i){
+    if(confirm('Delete this record?')){
+        data.splice(i,1);
+        localStorage.setItem('freelan_records', JSON.stringify(data));
+        showData();
+    }
+}
+
+function clearAll(){
+    if(data.length === 0){
+        alert('No records to delete');
+        return;
+    }
+
+    if(confirm('⚠️ Delete ALL saved records? This action cannot be undone.')){
+        data = [];
+        localStorage.removeItem('freelan_records');
+        showData();
+        alert('All records deleted successfully');
+    }
+}
+
+function searchRecords(text){
+    text = text.toLowerCase();
+
+    const filtered = data.filter(x =>
+        x.vehicle.toLowerCase().includes(text) ||
+        (x.deliveryDate && x.deliveryDate.toLowerCase().includes(text)) ||
+        x.driver.toLowerCase().includes(text) ||
+        x.phone.toLowerCase().includes(text) ||
+        x.areas.toLowerCase().includes(text)
+    );
+
+    showData(filtered);
+}
+
+function clearForm(){
+    document.getElementById('vehicle').value = '';
+    document.getElementById('deliveryDate').value = ''; 
+    document.getElementById('driver').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('areas').value = '';
+}
+
+function makePDF(){
+    if(data.length === 0){
+        alert('No data available to export to PDF');
+        return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+
+    pdf.setFontSize(22);
+    pdf.setFont(undefined,'bold');
+    pdf.text('FREELAN',105,15,{align:'center'});
+
+    pdf.setFontSize(16);
+    pdf.text('LORRY DELIVERY DETAILS',105,24,{align:'center'});
+
+    pdf.setFontSize(10);
+    pdf.setFont(undefined,'normal');
+    pdf.text('Generated: ' + new Date().toLocaleString(),105,31,{align:'center'});
+
+    const rows = data.map((x,i)=>[
+        i+1,
+        x.deliveryDate || 'N/A',
+        x.vehicle, 
+        x.driver,
+        x.phone,
+        x.areas.replace(/\n/g, ', ')
+    ]);
+
+    pdf.autoTable({
+        startY:38,
+        head:[['No','Date','Vehicle','Driver','Phone','Destinations']], 
+        body:rows,
+        theme:'grid',
+        styles:{fontSize:9,cellPadding:3},
+        headStyles:{fillColor:[198,40,40],textColor:255} 
+    });
+
+    pdf.save('FREELAN_LORRY_DELIVERY.pdf');
+}
+
+// Render data on load
+showData();
+</script>
+
+</body>
+</html>
