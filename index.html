@@ -572,7 +572,7 @@ function clearForm(){
     document.getElementById('phone').value = '';
     document.getElementById('areas').value = '';
 }
-
+	const HEADER_LOGO = "PASTE_YOUR_BASE64_IMAGE_HERE";
 function makePDF() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({
@@ -580,21 +580,22 @@ function makePDF() {
         unit: "mm",
         format: "a4"
     });
-
+	// Header Logo
+	
     // ===== Header =====
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(20);
-    pdf.text("FREELAN", 105, 12, { align: "center" });
+    pdf.setFontSize(10);
+    pdf.text("Freelan | Dinara", 187, 16, { align: "center" });
 
     pdf.setFontSize(11);
-    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 18, { align: "center" });
+    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 22, { align: "center" });
 
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
     pdf.text(
         "Generated : " + new Date().toLocaleString(),
         105,
-        23,
+        28,
         { align: "center" }
     );
 
@@ -609,7 +610,7 @@ function makePDF() {
     ]);
 
     pdf.autoTable({
-        startY: 28,
+        startY: 35,
 
         head: [[
             "#",
@@ -626,8 +627,8 @@ function makePDF() {
 
         styles: {
             font: "helvetica",
-            fontSize: 7,
-            cellPadding: 1.2,
+            fontSize: 11,
+            cellPadding: 3.2,
             lineWidth: 0.1,
             overflow: "linebreak",
             valign: "middle",
@@ -638,7 +639,7 @@ function makePDF() {
             fillColor: [198, 40, 40],
             textColor: 255,
             fontStyle: "bold",
-            fontSize: 8,
+            fontSize: 12,
             halign: "center"
         },
 
@@ -648,9 +649,9 @@ function makePDF() {
 
         columnStyles: {
             0: { cellWidth: 10, halign: "center" },
-            1: { cellWidth: 23 },
+            1: { cellWidth: 27 },
             2: { cellWidth: 26, fontStyle: "bold" },
-            3: { cellWidth: 35 },
+            3: { cellWidth: 32 },
             4: { cellWidth: 28 },
             5: { cellWidth: "auto" }
         },
@@ -671,7 +672,7 @@ function makePDF() {
             // Footer text
             pdf.setFontSize(8);
             pdf.text(
-                "FREELAN Lorry Delivery Report",
+                "Lorry Delivery Report - Udukawa",
                 8,
                 292
             );
