@@ -7,6 +7,7 @@
 
 <!-- External Libraries for PDF Generation -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 * {
@@ -82,7 +83,7 @@ body {
     justify-content: center;
     gap: 6px;
     transition: background 0.2s ease, transform 0.1s ease;
-    min-height: 44px;
+    min-height: 44px; /* Mobile tap target size optimization */
 }
 
 .btn:active {
@@ -300,7 +301,7 @@ textarea {
 .small-btn.edit:hover { background: #fff7e6; border-color: #ffb74d; color: #f57c00; }
 .small-btn.delete:hover { background: #ffebee; border-color: #e57373; color: #c62828; }
 
-/* Responsive Media Queries */
+/* Responsive Media Queries (Mobile Viewport Transformations) */
 @media(max-width: 900px) {
     .header {
         padding: 10px 12px;
@@ -325,11 +326,11 @@ textarea {
     }
 
     .table-head {
-        display: none;
+        display: none; /* Hide tabular column naming labels on small viewports */
     }
 
     .delivery-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Convert linear layout to a visual card setup */
         gap: 12px;
         padding: 16px;
         position: relative;
@@ -398,7 +399,7 @@ textarea {
             </div>
             <div class="form-group">
                 <label for="vehicle">Lorry Number</label>
-                <input type="text" id="vehicle" placeholder="e.g., LL-1288">
+                <input type="text" id="vehicle" placeholder="e.g., WP LA-1234">
             </div> 
             <div class="form-group">
                 <label for="driver">Driver Name</label>
@@ -421,6 +422,7 @@ textarea {
         </div>
     </div>
 
+    <!-- Layout Labels Table Column Headers (Hidden on Mobile viewports) -->
     <div class="table-head">
         <div class="head-cell">#</div>
         <div class="head-cell">📅 Date</div>
@@ -429,6 +431,7 @@ textarea {
         <div class="head-cell">🏢 Destinations</div>
     </div>
 
+    <!-- Active Target Presentation List -->
     <div id="list"></div>
 
 </div>
@@ -570,160 +573,122 @@ function clearForm(){
     document.getElementById('areas').value = '';
 }
 
-function makePDF(){
-    if(data.length === 0){
-        alert('No data available to export to PDF');
-        return;
-    }
-    
+function makePDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p','mm','a4');
-    
-    // Page Dimensions
-    const pageWidth = 210;
-    const pageHeight = 297;
-    const margin = 10;
-    
-    let currentY = 12;
-
-    const themes = [
-        { primary: [0, 90, 171], bg: [238, 246, 255] },     // Blue
-        { primary: [46, 125, 50], bg: [232, 245, 233] },    // Green
-        { primary: [106, 27, 154], bg: [243, 229, 245] },   // Purple
-        { primary: [194, 24, 91], bg: [252, 228, 236] },    // Pink
-        { primary: [230, 81, 0], bg: [255, 243, 224] },     // Orange
-        { primary: [0, 121, 107], bg: [224, 242, 241] }     // Teal
-    ];
-
-    function drawHeaderBanner(yPosition) {
-        doc.setFillColor(0, 43, 91);
-        doc.roundedRect(45, yPosition, 120, 10, 3, 3, 'F');
-        
-        doc.setDrawColor(255, 255, 255);
-        doc.setLineWidth(0.3);
-        doc.roundedRect(46.5, yPosition + 1, 117, 8, 2, 2, 'D');
-        
-        doc.setTextColor(255, 255, 255);
-        doc.setFont('Helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.text('LORRY DELIVERY DETAILS', 105, yPosition + 7, { align: 'center' });
-        
-        return yPosition + 15;
-    }
-
-    function drawTableHeaderLabels(yPosition) {
-        // Table Partition Header Boxes
-        doc.setFillColor(0, 51, 124);
-        doc.roundedRect(margin, yPosition, 10, 8, 1, 1, 'F'); // #
-        doc.roundedRect(margin + 12, yPosition, 26, 8, 1, 1, 'F'); // Date
-        doc.roundedRect(margin + 40, yPosition, 32, 8, 1, 1, 'F'); // Lorry Number
-        doc.roundedRect(margin + 74, yPosition, 46, 8, 1, 1, 'F'); // Driver & Contact
-        doc.roundedRect(margin + 122, yPosition, 68, 8, 1, 1, 'F'); // Destinations
-        
-        // Render Column Label Texts
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(8);
-        doc.setFont('Helvetica', 'bold');
-        
-        doc.text('DATE', margin + 25, yPosition + 5, { align: 'center' });
-        doc.text('LORRY NO', margin + 56, yPosition + 5, { align: 'center' });
-        doc.text('DRIVER & CONTACT', margin + 97, yPosition + 5, { align: 'center' });
-        doc.text('AGENCIES / DESTINATIONS', margin + 156, yPosition + 5, { align: 'center' });
-        
-        return yPosition + 11;
-    }
-
-    currentY = drawHeaderBanner(currentY);
-    currentY = drawTableHeaderLabels(currentY);
-
-    data.forEach((item, index) => {
-        // Redraw headers after every 6 rows
-        if (index > 0 && index % 6 === 0) {
-            currentY = drawTableHeaderLabels(currentY + 2);
-        }
-        
-        // Add new page if content overflows
-        if (currentY + 26 > pageHeight - margin) {
-            doc.addPage();
-            currentY = 12;
-            currentY = drawHeaderBanner(currentY);
-            currentY = drawTableHeaderLabels(currentY);
-        }
-
-        const theme = themes[index % themes.length];
-        const rowHeight = 22;
-
-        // Container Cards
-        doc.setFillColor(theme.bg[0], theme.bg[1], theme.bg[2]);
-        doc.roundedRect(margin + 12, currentY, 26, rowHeight, 3, 3, 'F'); // Date Box
-        doc.roundedRect(margin + 40, currentY, 32, rowHeight, 3, 3, 'F'); // Lorry Box
-        doc.roundedRect(margin + 74, currentY, 46, rowHeight, 3, 3, 'F'); // Driver Box
-        doc.roundedRect(margin + 122, currentY, 68, rowHeight, 3, 3, 'F'); // Destinations Box
-
-        // Outer Borders
-        doc.setDrawColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-        doc.setLineWidth(0.4);
-        doc.roundedRect(margin + 12, currentY, 26, rowHeight, 3, 3, 'D'); // Date
-        doc.roundedRect(margin + 40, currentY, 32, rowHeight, 3, 3, 'D'); // Lorry
-        doc.roundedRect(margin + 74, currentY, 46, rowHeight, 3, 3, 'D'); // Driver
-        doc.roundedRect(margin + 122, currentY, 68, rowHeight, 3, 3, 'D'); // Destinations
-
-        // Circular Index Badge
-        doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-        doc.circle(margin + 5, currentY + (rowHeight / 2), 4.5, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(9);
-        doc.setFont('Helvetica', 'bold');
-        doc.text(String(index + 1).padStart(2, '0'), margin + 5, currentY + (rowHeight / 2) + 1.2, { align: 'center' });
-
-        // Column 1: Date
-        doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-        doc.setFontSize(9);
-        doc.setFont('Helvetica', 'bold');
-        doc.text(item.deliveryDate || 'N/A', margin + 25, currentY + (rowHeight / 2) + 1.2, { align: 'center' });
-
-        // Column 2: Lorry Identification
-        doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-        doc.setFontSize(12);
-        doc.setFont('Helvetica', 'bold');
-        doc.text(item.vehicle, margin + 56, currentY + (rowHeight / 2) + 1.5, { align: 'center' });
-
-        // Column 3: Driver & Phone Information
-        doc.setTextColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-        doc.setFontSize(11);
-        doc.setFont('Helvetica', 'bold');
-        doc.text(item.driver, margin + 78, currentY + 9);
-
-        doc.setTextColor(50, 50, 50);
-        doc.setFontSize(10);
-        doc.setFont('Helvetica', 'normal');
-        doc.text(item.phone || 'N/A', margin + 78, currentY + 16);
-
-        // Column 4: Bulleted Destinations
-        doc.setFontSize(9.5);
-        doc.setFont('Helvetica', 'normal');
-        doc.setTextColor(10, 10, 10);
-
-        const lines = item.areas.split('\n').filter(l => l.trim() !== '');
-        let bulletY = currentY + 6;
-        
-        lines.slice(0, 4).forEach(line => {
-            // Bullet visual dot
-            doc.setFillColor(theme.primary[0], theme.primary[1], theme.primary[2]);
-            doc.circle(margin + 126, bulletY - 1, 0.8, 'F');
-            
-            // Clean truncation to prevent text overflow out of the box
-            let cleanText = line.length > 26 ? line.substring(0, 24) + '...' : line;
-            doc.text(cleanText, margin + 129, bulletY);
-            bulletY += 4.5;
-        });
-
-        currentY += rowHeight + 4; // Spacing for the next row
+    const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
     });
 
-    doc.save('FREELAN_LORRY_DELIVERY.pdf');
+    // ===== Header =====
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(20);
+    pdf.text("FREELAN", 105, 12, { align: "center" });
+
+    pdf.setFontSize(11);
+    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 18, { align: "center" });
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.text(
+        "Generated : " + new Date().toLocaleString(),
+        105,
+        23,
+        { align: "center" }
+    );
+
+    // ===== Table Data =====
+    const rows = data.map((x, i) => [
+        i + 1,
+        x.deliveryDate || "-",
+        x.vehicle,
+        x.driver,
+        x.phone || "-",
+        x.areas.replace(/\n/g, ", ")
+    ]);
+
+    pdf.autoTable({
+        startY: 28,
+
+        head: [[
+            "#",
+            "Date",
+            "Vehicle",
+            "Driver",
+            "Phone",
+            "Destinations"
+        ]],
+
+        body: rows,
+
+        theme: "grid",
+
+        styles: {
+            font: "helvetica",
+            fontSize: 7,
+            cellPadding: 1.2,
+            lineWidth: 0.1,
+            overflow: "linebreak",
+            valign: "middle",
+            textColor: 30
+        },
+
+        headStyles: {
+            fillColor: [198, 40, 40],
+            textColor: 255,
+            fontStyle: "bold",
+            fontSize: 8,
+            halign: "center"
+        },
+
+        alternateRowStyles: {
+            fillColor: [248, 248, 248]
+        },
+
+        columnStyles: {
+            0: { cellWidth: 10, halign: "center" },
+            1: { cellWidth: 23 },
+            2: { cellWidth: 26, fontStyle: "bold" },
+            3: { cellWidth: 35 },
+            4: { cellWidth: 28 },
+            5: { cellWidth: "auto" }
+        },
+
+        margin: {
+            top: 28,
+            left: 8,
+            right: 8,
+            bottom: 15
+        },
+
+        didDrawPage: function (data) {
+
+            // Footer line
+            pdf.setDrawColor(180);
+            pdf.line(8, 287, 202, 287);
+
+            // Footer text
+            pdf.setFontSize(8);
+            pdf.text(
+                "FREELAN Lorry Delivery Report",
+                8,
+                292
+            );
+
+            pdf.text(
+                "Page " + pdf.internal.getNumberOfPages(),
+                202,
+                292,
+                { align: "right" }
+            );
+        }
+    });
+
+    pdf.save("FREELAN_Lorry_Delivery_Report.pdf");
 }
 
+// Render data on load
 showData();
 </script>
 
