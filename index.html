@@ -180,13 +180,13 @@ function genId() {
 
 async function loadData() {
     if (!isConfigured()) {
-        setStatus('error', '⚠️ Google Sheet not connected yet. Paste your Apps Script Web App URL into SCRIPT_URL in the code.');
+        setStatus('error', '⚠️ Database not connected yet. Paste your Apps Script Web App URL into SCRIPT_URL in the code.');
         setControlsEnabled(false);
         showData();
         return;
     }
 
-    setStatus('loading', '🔄 Loading records from Google Sheet…');
+    setStatus('loading', '🔄 Loading records from Database');
     setControlsEnabled(false);
     try {
         const res = await fetch(SCRIPT_URL);
@@ -195,7 +195,7 @@ async function loadData() {
         data = json.records || [];
         setStatus(null);
     } catch (err) {
-        setStatus('error', '⚠️ Could not load records from Google Sheet. Check the connection and refresh.');
+        setStatus('error', '⚠️ Could not load records Database. Check the connection and refresh.');
         data = [];
     }
     setControlsEnabled(true);
