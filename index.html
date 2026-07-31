@@ -388,11 +388,11 @@ function makePDF() {
     pdf.text("Freelan | Dinara", 187, 16, { align: "center" });
 
     pdf.setFontSize(10);
-    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 20, { align: "center" });
+    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 18, { align: "center" });
 
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
-    pdf.text("Generated : " + new Date().toLocaleString(), 105, 24, { align: "center" });
+    pdf.text("Generated : " + new Date().toLocaleString(), 105, 22, { align: "center" });
 
     const rows = data.map((x, i) => [
         i + 1,
@@ -404,12 +404,12 @@ function makePDF() {
     ]);
 
     pdf.autoTable({
-        startY: 30,
+        startY: 26,
         head: [["#", "Date", "Vehicle", "Driver", "Phone", "Destinations"]],
         body: rows,
         theme: "grid",
-        styles: { font: "helvetica", fontSize: 11, cellPadding: 3.2, lineWidth: 0.1, overflow: "linebreak", valign: "middle", textColor: 30 },
-        headStyles: { fillColor: [198, 40, 40], textColor: 255, fontStyle: "bold", fontSize: 12, halign: "center" },
+        styles: { font: "helvetica", fontSize: 9, cellPadding: 3.2, lineWidth: 0.1, overflow: "linebreak", valign: "middle", textColor: 30 },
+        headStyles: { fillColor: [198, 40, 40], textColor: 255, fontStyle: "bold", fontSize: 10, halign: "center" },
         alternateRowStyles: { fillColor: [248, 248, 248] },
         columnStyles: { 0: { cellWidth: 8, halign: "center" }, 1: { cellWidth: 25 }, 2: { cellWidth: 24, fontStyle: "bold" }, 3: { cellWidth: 28 }, 4: { cellWidth: 28 }, 5: { cellWidth: "auto" } },
         margin: { top: 28, left: 8, right: 8, bottom: 15 },
