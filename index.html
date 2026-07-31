@@ -384,8 +384,8 @@ function makePDF() {
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(9);
-    pdf.text("Freelan | Dinara", 187, 16, { align: "center" });
+    pdf.setFontSize(8);
+    pdf.text("Freelan | Dinara", 187, 15, { align: "center" });
 
     pdf.setFontSize(10);
     pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 18, { align: "center" });
@@ -408,8 +408,8 @@ function makePDF() {
         head: [["#", "Date", "Vehicle", "Driver", "Phone", "Destinations"]],
         body: rows,
         theme: "grid",
-        styles: { font: "helvetica", fontSize: 9, cellPadding: 2.1, lineWidth: 0.1, overflow: "linebreak", valign: "middle", textColor: 30 },
-        headStyles: { fillColor: [198, 40, 40], textColor: 255, fontStyle: "bold", fontSize: 10, halign: "center" },
+        styles: { font: "helvetica", fontSize: 10, cellPadding: 2.4, lineWidth: 0.1, overflow: "linebreak", valign: "middle", textColor: 30 },
+        headStyles: { fillColor: [198, 40, 40], textColor: 255, fontStyle: "bold", fontSize: 11, halign: "center" },
         alternateRowStyles: { fillColor: [248, 248, 248] },
         columnStyles: { 0: { cellWidth: 11, halign: "center" }, 1: { cellWidth: 28 }, 2: { cellWidth: 24, fontStyle: "bold" }, 3: { cellWidth: 28 }, 4: { cellWidth: 28 }, 5: { cellWidth: "auto" } },
         margin: { top: 28, left: 8, right: 8, bottom: 15 },
