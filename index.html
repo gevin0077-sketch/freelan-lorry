@@ -385,14 +385,14 @@ function makePDF() {
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
-    pdf.text("Freelan | Dinara", 187, 15, { align: "center" });
+    pdf.text("Freelan | Dinara", 187, 16, { align: "center" });
 
-    pdf.setFontSize(10);
-    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 18, { align: "center" });
+    pdf.setFontSize(11);
+    pdf.text("LORRY DELIVERY DETAILS REPORT", 105, 20, { align: "center" });
 
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
-    pdf.text("Generated : " + new Date().toLocaleString(), 105, 22, { align: "center" });
+    pdf.text("Generated : " + new Date().toLocaleString(), 105, 25, { align: "center" });
 
     const rows = data.map((x, i) => [
         i + 1,
@@ -404,19 +404,19 @@ function makePDF() {
     ]);
 
     pdf.autoTable({
-        startY: 26,
+        startY: 29,
         head: [["#", "Date", "Vehicle", "Driver", "Phone", "Destinations"]],
         body: rows,
         theme: "grid",
-        styles: { font: "helvetica", fontSize: 10, cellPadding: 2.4, lineWidth: 0.1, overflow: "linebreak", valign: "middle", textColor: 30 },
+        styles: { font: "helvetica", fontSize: 10, cellPadding: 2.6, lineWidth: 0.1, overflow: "linebreak", valign: "middle", textColor: 30 },
         headStyles: { fillColor: [198, 40, 40], textColor: 255, fontStyle: "bold", fontSize: 11, halign: "center" },
         alternateRowStyles: { fillColor: [248, 248, 248] },
-        columnStyles: { 0: { cellWidth: 11, halign: "center" }, 1: { cellWidth: 28 }, 2: { cellWidth: 24, fontStyle: "bold" }, 3: { cellWidth: 28 }, 4: { cellWidth: 28 }, 5: { cellWidth: "auto" } },
+        columnStyles: { 0: { cellWidth: 11, halign: "center" }, 1: { cellWidth: 27 }, 2: { cellWidth: 26, fontStyle: "bold" }, 3: { cellWidth: 28 }, 4: { cellWidth: 28 }, 5: { cellWidth: "auto" } },
         margin: { top: 28, left: 8, right: 8, bottom: 15 },
         didDrawPage: function (data) {
             pdf.setDrawColor(180);
             pdf.line(8, 287, 202, 287);
-            pdf.setFontSize(6);
+            pdf.setFontSize(8);
             pdf.text("Lorry Delivery Report - Udukawa", 8, 292);
             pdf.text("Page " + pdf.internal.getNumberOfPages(), 202, 292, { align: "right" });
         }
